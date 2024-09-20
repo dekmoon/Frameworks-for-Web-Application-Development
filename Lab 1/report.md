@@ -50,41 +50,54 @@
 
 ### 1. GET-запрос к серверу
 
-GET / HTTP/1.1
-Host: sandbox.com
-User-Agent: Михаил Червоный
+GET / HTTP/1.1  
+Host: sandbox.com  
+User-Agent: Михаил Червоный  
 
-2. POST-запрос к серверу
-POST /cars HTTP/1.1
-Host: sandbox.com
-Content-Type: application/x-www-form-urlencoded
+### 2. POST-запрос к серверу
 
-make=Toyota&model=Corolla&year=2020
-3. PUT-запрос к серверу
-PUT /cars/1 HTTP/1.1
-Host: sandbox.com
-User-Agent: Михаил Червоный
-Content-Type: application/json
+POST /cars HTTP/1.1  
+Host: sandbox.com  
+Content-Type: application/x-www-form-urlencoded  
 
-{"make": "Toyota", "model": "Corolla", "year": 2021}
-4. Вариант ответа сервера на POST-запрос
-HTTP/1.1 201 Created
-Content-Type: application/json
-Location: http://sandbox.com/cars/1
-{
-  "message": "Car created successfully.",
-  "car": {
-    "make": "Toyota",
-    "model": "Corolla",
-    "year": 2020,
-    "id": 1
-  }
-}
-5. Возможные ситуации для HTTP-кодов состояния
-•	200 OK: Запрос был успешно выполнен.
-•	201 Created: Ресурс был успешно создан.
-•	400 Bad Request: Неверный синтаксис запроса.
-•	401 Unauthorized: Требуются учетные данные.
-•	403 Forbidden: Нет прав доступа к ресурсу.
-•	404 Not Found: Запрашиваемый ресурс не найден.
-•	500 Internal Server Error: Ошибка на стороне сервера.
+make=Toyota&model=Corolla&year=2020  
+
+### 3. PUT-запрос к серверу
+
+PUT /cars/1 HTTP/1.1  
+Host: sandbox.com  
+User-Agent: Михаил Червоный  
+Content-Type: application/json  
+
+{  
+  "make": "Toyota",  
+  "model": "Corolla",  
+  "year": 2021  
+}  
+
+### 4. Вариант ответа сервера на POST-запрос
+
+HTTP/1.1 201 Created  
+Content-Type: application/json  
+Location: http://sandbox.com/cars/1  
+
+{  
+  "message": "Car created successfully.",  
+  "car": {  
+    "make": "Toyota",  
+    "model": "Corolla",  
+    "year": 2020,  
+    "id": 1  
+  }  
+}  
+
+### 5. Возможные ситуации для HTTP-кодов состояния
+
+- **200 OK**: Запрос был успешно выполнен.
+- **201 Created**: Ресурс был успешно создан.
+- **400 Bad Request**: Неверный синтаксис запроса.
+- **401 Unauthorized**: Требуются учетные данные.
+- **403 Forbidden**: Нет прав доступа к ресурсу.
+- **404 Not Found**: Запрашиваемый ресурс не найден.
+- **500 Internal Server Error**: Ошибка на стороне сервера.
+
