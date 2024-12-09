@@ -1,66 +1,491 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Лабораторная работа №5. Компоненты безопасности в Laravel
 
-## About Laravel
+## Цель работы
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Познакомиться с основами компонентов безопасности в Laravel, такими как:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Аутентификация;
+- Авторизация;
+- Защита от CSRF.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Изучить использование встроенных механизмов для управления доступом, включая создание защищенных маршрутов и управление ролями пользователей.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## №1. Подготовка к работе
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Для лабораторной работы №5 создадим новый проект и базу данных `lab5`.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+composer create-project laravel/laravel:^10 Lab_5
+```
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## №2. Аутентификация пользователей
 
-### Premium Partners
+Создадим контроллер `AuthController` для управления аутентификацией пользователей:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+```bash
+php artisan make:controller AuthController
+```
 
-## Contributing
+### Методы аутентификации
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. **Форма регистрации:**
 
-## Code of Conduct
+```php
+public function register()
+{
+    return view('register');
+}
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+2. **Обработка формы регистрации:**
 
-## Security Vulnerabilities
+```php
+public function storeRegister(Request $request)
+{
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:25',
+        'email' => 'required|string|email|max:35|unique:users',
+        'password' => 'required|string|min:6|confirmed',
+    ]);
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    $user = User::create([
+        'name' => $validatedData['name'],
+        'email' => $validatedData['email'],
+        'password' => Hash::make($validatedData['password']),
+    ]);
 
-## License
+    Auth::login($user);
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+    return redirect()->route('home');
+}
+```
+
+3. **Форма входа:**
+
+```php
+public function login()
+{
+    return view('login');
+}
+```
+
+4. **Обработка формы входа:**
+
+```php
+public function storeLogin(Request $request)
+{
+    $credentials = $request->validate([
+        'email' => 'required|string|email',
+        'password' => 'required|string',
+    ]);
+
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+
+        return redirect()->route('home');
+    }
+
+    return back()->withErrors([
+        'email' => 'Неверные учетные данные.',
+    ])->onlyInput('email');
+}
+```
+
+5. **Выход пользователя из системы:**
+
+```php
+public function logout(Request $request)
+{
+    Auth::logout();
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('login');
+}
+```
+
+---
+
+### Настройка маршрутов
+
+Настроим маршруты в файле `routes/web.php`:
+
+```php
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
+
+
+
+// Главная страница
+Route::get('/', function () {
+    return view('home');
+});
+
+// Маршрут для формы регистрации
+Route::get('/register', [AuthController::class, 'register'])->name('register');
+
+// Маршрут для обработки регистрации
+Route::post('/register', [AuthController::class, 'storeRegister'])->name('register.store');
+
+// Маршрут для формы входа
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+
+// Маршрут для обработки входа
+Route::post('/login', [AuthController::class, 'storeLogin'])->name('login.store');
+
+// Маршрут для выхода из системы
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Защищённые маршруты, доступные только для авторизованных пользователей
+Route::middleware('auth')->group(function () {
+    // Личный кабинет (пользователь может видеть только свой)
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+
+    // Личный кабинет администратора (может видеть всех пользователей)
+    Route::get('/admin/profiles', [ProfileController::class, 'index'])
+        ->middleware('role:admin')
+        ->name('admin.profiles');
+});
+```
+
+---
+
+### Создание представлений
+
+Создадим представления:
+
+1. **`register.blade.php`:**
+
+```html
+<<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5">
+                <div class="card-header">{{ __('Регистрация') }}</div>
+                <div class="card-body">
+                    <form method="POST" action="{{ route('register.store') }}">
+                        @csrf
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Имя:</label>
+                            <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email:</label>
+                            <input type="email" name="email" id="email" class="form-control" value="{{ old('email') }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Пароль:</label>
+                            <input type="password" name="password" id="password" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password_confirmation" class="form-label">Подтверждение пароля:</label>
+                            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+>
+```
+![Скриншот регистрации](скриншоты/register.pnp)
+2. **`login.blade.php`:**
+
+```html
+<<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5">
+                <div class="card-header">{{ __('Вход в систему') }}</div>
+                <div class="card-body">
+                    <!-- Ошибки формы -->
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <!-- Форма входа -->
+                    <form method="POST" action="{{ route('login.store') }}">
+                        @csrf
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email:</label>
+                            <input type="email" name="email" id="email" class="form-control" value="{{ old('email') }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Пароль:</label>
+                            <input type="password" name="password" id="password" class="form-control" required>
+                        </div>
+
+                        <!-- Чекбокс для запоминания -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" name="remember" id="remember" class="form-check-input">
+                            <label class="form-check-label" for="remember">Запомнить меня</label>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary w-100">Войти</button>
+                        </div>
+                    </form>
+
+                    <p>Нет аккаунта? <a href="{{ route('register') }}">Зарегистрироваться</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+```
+![Скриншот входа](скриншоты/loginpage.png)
+3. **`home.blade.php`:**
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <!-- Подключаем Bootstrap из CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="text-center">
+        <h1>Добро пожаловать на главную страницу!</h1>
+        @if(auth()->check())
+            <p class="mt-3">Привет, {{ auth()->user()->name }}! Вы вошли в систему.</p>
+            <form method="POST" action="{{ route('logout') }}" class="mt-3">
+                @csrf
+                <button type="submit" class="btn btn-danger">Выйти</button>
+            </form>
+        @else
+            <p class="mt-3">Вы не вошли в систему.</p>
+            <a href="{{ route('login') }}" class="btn btn-primary">Вход</a>
+            <a href="{{ route('register') }}" class="btn btn-secondary">Регистрация</a>
+        @endif
+    </div>
+</div>
+
+<!-- Подключаем Bootstrap JS и его зависимости (Popper.js и Bootstrap Bundle) -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
+```
+![Скриншот входа](скриншоты/homepage.png)
+---
+
+## №3. Авторизация пользователей
+
+Добавим проверку доступа к `home`-странице, используя middleware `auth`.
+
+Обновим маршрут:
+
+```php
+Route::get('/home', function () {
+    return view('home');
+})->name('home')->middleware('auth');
+
+```
+![Скриншот успешного входа](скришоты/image.png)
+---
+
+## №4. Роли пользователей
+
+### Шаг 1: Добавление поля `role` в таблицу `users`
+
+Создадим миграцию:
+
+```bash
+php artisan make:migration add_role_to_users_table --table=users
+```
+
+В файле миграции:
+
+```php
+ public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('role')->default('user');  // Добавляем колонку для роли
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('role');
+        });
+    }
+};
+
+```
+
+Применим миграции:
+
+```bash
+php artisan migrate
+```
+
+---
+
+### Шаг 2: Настройка модели `User`
+
+Добавим метод `isAdmin()`:
+
+```php
+protected function isAdmin()
+{
+    return $this->role === 'admin';
+}
+```
+
+---
+
+### Шаг 3: Middleware для проверки ролей
+
+Создадим middleware:
+
+```bash
+php artisan make:middleware CheckRole
+```
+
+Добавим проверку роли:
+
+```php
+{
+    public function handle(Request $request, Closure $next, $role)
+    {
+        if (Auth::check() && Auth::user()->role !== $role) {
+            abort(403, 'Access denied');
+        }
+
+        return $next($request);
+    }
+}
+```
+
+Зарегистрируем middleware в `app/Http/Kernel.php`:
+
+```php
+pprotected $routeMiddleware = [
+        'role' => \App\Http\Middleware\CheckRole::class,
+    ];
+```
+
+---
+
+### Шаг 4: Маршрут и контроллер для админки
+
+Создадим контроллер:
+
+```bash
+php artisan make:controller AdminController
+```
+
+Добавим маршрут:
+
+```php
+Route::get('/admin', [AdminController::class, 'index'])
+    ->name('admin')
+    ->middleware('role:admin');
+```
+
+Метод `index`:
+
+```php
+public function index()
+{
+    $users = User::all();
+    return view('admin', compact('users'));
+}
+```
+
+Представление `admin.blade.php`:
+
+```html
+<h1>Админ-панель</h1>
+<ul>
+    @foreach($users as $user)
+        <li>{{ $user->name }} - {{ $user->email }} - Роль: {{ $user->role }}</li>
+    @endforeach
+</ul>
+```
+
+Добавим ссылку на админку:
+
+```html
+@if(Auth::user()->isAdmin())
+    <p><a href="{{ route('admin') }}">Перейти в панель администратора</a></p>
+@endif
+```
+
+---
+
+### Шаг 5: Проверка
+
+Через Tinker зададим пользователю роль `admin`:
+
+```bash
+php artisan tinker
+
+$user = \App\Models\User::find(1);
+$user->role = 'admin';
+$user->save();
+```
+
+---
+
+## Завершение
+
+
