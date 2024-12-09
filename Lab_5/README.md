@@ -217,7 +217,7 @@ Route::middleware('auth')->group(function () {
 </html>
 >
 ```
-![Скриншот регистрации](скриншоты/register.pnp)
+![Скриншот регистрации](скриншоты/register.png)
 2. **`login.blade.php`:**
 
 ```html
