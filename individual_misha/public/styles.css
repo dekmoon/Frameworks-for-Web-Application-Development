@@ -1,0 +1,166 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #f4f4f9;
+    color: #333;
+    line-height: 1.6;
+    height: 100vh;
+    display: flex;
+    justify-content: space-between;
+    font-family: Montserrat, sans-serif;
+}
+
+header {
+    background-color: #2c3e50;
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    max-width: 220px;
+}
+.height {max-width: 1000px;}
+
+footer {
+    background-color: #2c3e50;
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    max-width: 220px;
+
+}
+
+footer p {
+    font-size: 1rem;
+}
+
+main {
+    padding: 40px 0;
+}
+
+h2 {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.post {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.post h2 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+}
+
+.post p {
+    font-size: 1rem;
+    color: #666;
+}
+
+.admin-link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #27ae60;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.admin-link:hover {
+    background-color: #2ecc71;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.admin-button-div {
+    margin-bottom: 22px;
+    margin-top: 22px;
+}
+
+.admin-button {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    background-color: #ba96dc;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    text-decoration: none;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.btn-logout {
+    background-color: #e67e22;
+    color: white;
+}
+
+.btn-logout:hover {
+    background-color: #d35400;
+}
+
+form {
+    margin-top: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+input[type="text"] {
+    height: 40px;
+}
+
+textarea {
+    height: 150px;
+}
