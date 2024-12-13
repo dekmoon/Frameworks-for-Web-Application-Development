@@ -48,7 +48,13 @@ DB_PASSWORD=198312
 ```bash
 php artisan migrate 
 ```
-
+Сгенерируем ключ приложения.
+```bash
+php artisan key:generate
+```
+```bash
+APP_KEY=base64:hncxZx5Kaz09ZKS99A+SluigGdZqb7PrxP+3ABWF2Io=
+```
 ---
 
 ## №2. Аутентификация пользователей
