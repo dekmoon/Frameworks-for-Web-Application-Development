@@ -36,6 +36,14 @@ use lab_5;
 SHOW TABLES;
 ```
 Заходим в наш проект .env файл и подключаем нашу базу данных(имя базы данных, пароль если установили)
+```bash
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=misha
+DB_USERNAME=root
+DB_PASSWORD=198312
+```
 После этого нужно зайти ив кореньнашего проекта и прописать команду:
 ```bash
 php artisan migrate 
